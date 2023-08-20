@@ -1,0 +1,8 @@
+boost==0.1
+cmake
+boost-py
+dlib
+face_recognition_models
+face-recognition
+Flask==1.1.2
+gunicorn==20.0.4
