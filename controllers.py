@@ -1,7 +1,8 @@
 import os
 from fastapi import FastAPI
 from starlette.requests import Request
-from ai_talk import AITalkWebAPI
+from modules.ai_talk import AITalkWebAPI
+import sqlite3
  
 app = FastAPI(
     title='spajam チームアンリミテッドエグゾディア',
@@ -45,3 +46,18 @@ def ai_talk(request: Request):
 		print('failed to save', file=sys.stderr)
 		return 1
 	return 0
+
+def user_create():
+  dbname = 'spajam.db'
+  conn = sqlite3.connect(dbname)
+  cur = conn.cursor()
+  cur.execute('INSERT INTO persons(name) values("Taro")')
+  conn.commit()
+  cur.close()
+  conn.close()
+
+# def user_read():
+
+# def user_update():
+
+# def user_delete():
