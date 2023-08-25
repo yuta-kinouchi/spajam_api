@@ -10,10 +10,11 @@ app = FastAPI(
     version='0.9 beta'
 )
  
- 
+@app.get("/")
 def index(request: Request):
     return {'Hello': 'World'}
 
+@app.get("/ai-talk")
 def ai_talk(request: Request):
 	"""メイン処理"""
 
@@ -47,7 +48,8 @@ def ai_talk(request: Request):
 		return 1
 	return 0
 
-def user_create():
+@app.get("/user/create")
+def user_create(user_name: str):
   dbname = 'spajam.db'
   conn = sqlite3.connect(dbname)
   cur = conn.cursor()
