@@ -12,10 +12,27 @@ import crud
 import models
 import schemas
 from database import SessionLocal, engine
-
 import openai
 
+from langchain.document_loaders.csv_loader import CSVLoader
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
 
+os.environ["OPENAI_API_KEY"] = "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"
+openai.api_key = "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"
+
+loader = CSVLoader(file_path="./price_table.csv")
+data = loader.load()
+
+chunk_size = 500
+chunk_overlap = 0
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=chunk_size, chunk_overlap=chunk_overlap
+)
+all_splits = text_splitter.split_documents(data)
+
+db = Chroma.from_documents(all_splits, OpenAIEmbeddings())
 
 # テーブルの作成
 models.Base.metadata.create_all(bind=engine)
@@ -118,3 +135,8 @@ async def chat_gpt(question: str):
 	)
 	print(response)
 	return response.choices[0]["message"]["content"]
+
+@app.get("/vector-search")
+async def vector_search(question: str):
+  docs = db.similarity_search(question)
+  return docs[0].page_content
