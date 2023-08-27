@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from starlette.requests import Request
 from modules.ai_talk import AITalkWebAPI
+from dotenv import load_dotenv
 
 from typing import List
 
@@ -19,8 +20,9 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 
-os.environ["OPENAI_API_KEY"] = "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"
-openai.api_key = "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"
+load_dotenv()
+os.environ["OPENAI_API_KEY"] = os.environ['OPEN_AI_API_KEY']
+openai.api_key = os.environ['OPEN_AI_API_KEY']
 
 loader = CSVLoader(file_path="./price_table.csv")
 data = loader.load()
