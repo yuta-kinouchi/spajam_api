@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, Form
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
@@ -140,7 +140,7 @@ async def vector_search(question: str):
   return docs[0].page_content
 
 @app.post("/image-upload")
-def image_upload(file: UploadFile):
+def image_upload(file: UploadFile, api: str = Form(...)):
 	path = f'api/files/{file.filename}'
 	with open(path, 'wb+') as buffer:
 		shutil.copyfileobj(file.file, buffer)
@@ -152,3 +152,18 @@ def image_upload(file: UploadFile):
 	with open(path, 'wb+') as buffer:
 		shutil.copyfileobj(file.file, buffer)
 	return True
+
+@app.post("/question")
+async def question_generate(file: UploadFile, api: str = Form(...)):
+	print("hello")
+	print(api)
+	openai.api_key = api
+	response = openai.ChatCompletion.create(
+		model="gpt-3.5-turbo",
+		temperature=1,
+		messages=[
+				{"role": "user", "content": question},
+		],
+	)
+	return True
+	
