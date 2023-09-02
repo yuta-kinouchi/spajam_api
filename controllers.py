@@ -58,8 +58,3 @@ def user_create(user_name: str):
   cur.close()
   conn.close()
 
-# def user_read():
-
-# def user_update():
-
-# def user_delete():
