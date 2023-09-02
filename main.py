@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 import crud
@@ -14,6 +14,7 @@ import models
 import schemas
 from database import SessionLocal, engine
 import openai
+import shutil
 
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -130,15 +131,28 @@ async def chat_gpt(question: str):
 
 	response = openai.ChatCompletion.create(
 			model="gpt-3.5-turbo",
-			temperature=0,
+			temperature=1,
 			messages=[
 					{"role": "user", "content": question},
 			],
 	)
-	print(response)
 	return response.choices[0]["message"]["content"]
 
 @app.get("/vector-search")
 async def vector_search(question: str):
   docs = db.similarity_search(question)
   return docs[0].page_content
+
+@app.post("/image-upload")
+def image_upload(file: UploadFile):
+	path = f'api/files/{file.filename}'
+	with open(path, 'wb+') as buffer:
+		shutil.copyfileobj(file.file, buffer)
+	return True
+
+@app.post("/txt-generate")
+def image_upload(file: UploadFile):
+	path = f'api/files/{file.filename}'
+	with open(path, 'wb+') as buffer:
+		shutil.copyfileobj(file.file, buffer)
+	return True
