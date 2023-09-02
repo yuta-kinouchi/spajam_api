@@ -19,7 +19,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 
 load_dotenv()
-os.environ["OPENAI_API_KEY"] = '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'
 openai.api_key = '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
 
 loader = CSVLoader(file_path="./price_table.csv")
