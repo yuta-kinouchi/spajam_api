@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException, UploadFile, Form
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, Form, Response
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
@@ -209,7 +209,7 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 	with open(path, 'wb+') as buffer:
 		shutil.copyfileobj(file.file, buffer)
 
-	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/" + path
+	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/image$filename=" + path
 	print(image_url)
 	system_message ="""
 	質問には必ず「はい」か「いいえ」だけで答えてください。
@@ -294,4 +294,9 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 	# text_to_voice(response.choices[0]["message"]["content"])
 	return kaerichi 
 
-	
+
+@app.get("/image/")
+def image(filename: str):
+	print(filename)
+	with open(filename, "rb") as f:
+		return Response(content=f.read(), media_type="image/png")
