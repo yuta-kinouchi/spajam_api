@@ -205,7 +205,7 @@ async def question_generate_beta(file: UploadFile, api: str = Form(...)):
 async def question_generate(file: UploadFile, api: str = Form(...)):
 	openai.api_key = api
 
-	path = f'api/files/{file.filename}'
+	path = f'api/file/{file.filename}'
 	with open(path, 'wb+') as buffer:
 		shutil.copyfileobj(file.file, buffer)
 
