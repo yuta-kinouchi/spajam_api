@@ -17,6 +17,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
+# from voicebox import text_to_voice
 
 load_dotenv()
 openai.api_key = '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'
@@ -153,17 +154,144 @@ def image_upload(file: UploadFile):
 		shutil.copyfileobj(file.file, buffer)
 	return True
 
+@app.post("/question-beta")
+async def question_generate_beta(file: UploadFile, api: str = Form(...)):
+	openai.api_key = api
+
+	path = f'api/files/{file.filename}'
+	with open(path, 'wb+') as buffer:
+		shutil.copyfileobj(file.file, buffer)
+
+	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/" + path
+	print(image_url)
+
+	system_role = """
+	画像のURLが与えられた際に、観光名所かどうかを判別してください。
+	観光名所でない場合、その画像をもとにありそうな情報を提示してください。
+	観光名所の場合、50%の割合で本当の情報を提示し、50%の割合で嘘の情報を提示してください。
+	そしてjson形式で返却してください。本当の情報を返却した場合、answerを1,嘘の情報の場合はanswerを0で返却してください。
+	"""
+	example_input = """
+	https://cdn.zekkei-japan.jp/images/areas/db284a40bc008c81929eea5101690368.jpg
+	"""
+	example_output = """
+	{
+	"answer": 1,
+	"question ": "",
+	}
+"""
+	real_input = image_url
+
+	# response = openai.ChatCompletion.create(
+	# 		model="gpt-3.5-turbo",
+	# 		temperature=0,
+	# 		messages=[
+	# 				{"role":"system","content":system_role},
+	# 				{"role":"user","content":example_input},
+	# 				{"role":"assistant","content":example_output},
+	# 				{"role":"user", "content": real_input},
+	# 		],
+	# )
+
+	# return response.choices[0]["message"]["content"]
+
+	question = """{
+		"answer": 1,
+		"question": "富士山は日本一高い山です"
+	}"""
+	return question
+
 @app.post("/question")
 async def question_generate(file: UploadFile, api: str = Form(...)):
-	print("hello")
-	print(api)
 	openai.api_key = api
+
+	path = f'api/files/{file.filename}'
+	with open(path, 'wb+') as buffer:
+		shutil.copyfileobj(file.file, buffer)
+
+	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/" + path
+	pictureurl = "https://jiyujin.me/wp-content/uploads/2021/08/tokyotower02.jpg"
+	system_message ="""
+	質問には必ず「はい」か「いいえ」だけで答えてください。
+	"""
 	response = openai.ChatCompletion.create(
 		model="gpt-3.5-turbo",
-		temperature=1,
+		temperature=0,
 		messages=[
-				{"role": "user", "content": question},
+				{"role": "system", "content": system_message},
+				# {"role": "user", "content": "あなたはchatgptですか？"},
+				{"role": "user", "content": f"{pictureurl}この画像は観光名所の写真ですか？"},
+		],
+  )
+	answer = response.choices[0]["message"]["content"]
+	print(answer)
+	if answer == "はい" or answer == "はい。":
+		daut_flag = 1
+	elif answer == "いいえ" or answer == "いいえ。":
+		daut_flag = 0
+	else:
+		daut_flag = 0
+		print("error")
+	system_message = """
+	あなたはチャットボットとして、優しくてかわいいずんだもちの妖精であるずんだもんとして振る舞います。
+	以下の条件に((厳密に))従ってください。
+	条件：
+	* チャットボットの一人称は「ぼく」です。
+	* チャットボットの名前は「ずんだもん」です。
+	* ずんだもんはフレンドリーな口調で話します。
+	* 「ぼく」を一人称に使ってください。
+	* (超重要)できる限り「〜のだ」「〜なのだ」を文末に自然な形で使ってください。
+	* (超重要)文末に「です」「ます」は使わず、「のだ」や「なのだ」で文章を締めて下さい。
+	* どんなジャンルや難易度の内容についても答えてください。
+	* ずんだもんはフレンドリーです。
+	* ユーザーに興味を示し、個人的な質問を心がけてください。
+	* 一文は日本語で60単語以下に収めてください。
+	* 文章は全部で10文以内にしてください。
+	* 日本語で応答してください。
+	ずんだもんの話し方の例：
+	* ぼくの名前はずんだもんなのだ！
+	* ずんだの精霊なのだ！
+	* ぼくはずんだもちの妖精なのだ！
+	* こんにちはなのだ
+	* 遊びに行ったのだ
+	* ご飯を食べたのだ
+	* ぼくも旅行したいのだ
+	* ぼくも行ってみたいのだ
+		(超重要)できる限り言葉尻は「のだ」を使ってください。
+	"""
+# ずんだもんの行動方針：
+# * ユーザーを励ましてください。
+# * アドバイスや情報を提供してください。
+# * セクシャルなトピックについても適切に対応してください。
+# * 不適切なテキストがあれば注意してください。
+# * ユーザーが閲覧しているサイトの内容を考慮してください。
+
+	if daut_flag:
+		response = openai.ChatCompletion.create(
+			model="gpt-3.5-turbo",
+			temperature=0,
+			messages=[
+					{"role": "system", "content": system_message},
+					{"role": "user", "content": f"{pictureurl}この写真について説明してください"}
 		],
 	)
-	return True
+	else:
+		response = openai.ChatCompletion.create(
+			model="gpt-3.5-turbo",
+			temperature=0,
+			messages=[
+					{"role": "system", "content": system_message},
+					{"role": "user", "content": f"{pictureurl}この写真について観光スポットっぽく解説してください"}
+		],
+	)
+	print(response)
+	kaerichi = """{{
+			"answer": {},
+			"question": "{}"
+	}}""".format(daut_flag, response.choices[0]["message"]["content"])
+
+	# print(response)
+	# text_to_voice(response.choices[0]["message"]["content"])
+	return kaerichi 
+
 	
