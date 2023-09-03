@@ -220,7 +220,7 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 		messages=[
 				{"role": "system", "content": system_message},
 				# {"role": "user", "content": "あなたはchatgptですか？"},
-				{"role": "user", "content": f"{pictureurl}この画像は観光名所の写真ですか？"},
+				{"role": "user", "content": f"{image_url}この画像は観光名所の写真ですか？"},
 		],
   )
 	answer = response.choices[0]["message"]["content"]
