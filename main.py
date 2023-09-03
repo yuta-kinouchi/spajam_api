@@ -272,7 +272,7 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 			temperature=0,
 			messages=[
 					{"role": "system", "content": system_message},
-					{"role": "user", "content": f"{pictureurl}この写真について説明してください"}
+					{"role": "user", "content": f"{image_url}この写真について説明してください"}
 		],
 	)
 	else:
@@ -281,7 +281,7 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 			temperature=0,
 			messages=[
 					{"role": "system", "content": system_message},
-					{"role": "user", "content": f"{pictureurl}この写真について観光スポットっぽく解説してください"}
+					{"role": "user", "content": f"{image_url}この写真について観光スポットっぽく解説してください"}
 		],
 	)
 	print(response)
