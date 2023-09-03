@@ -17,7 +17,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
-# from voicebox import text_to_voice
+from voicebox import text_to_voice
 
 load_dotenv()
 openai.api_key = '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'
@@ -209,29 +209,30 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 	with open(path, 'wb+') as buffer:
 		shutil.copyfileobj(file.file, buffer)
 
-	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/image$filename=" + path
-	print(image_url)
-	system_message ="""
-	質問には必ず「はい」か「いいえ」だけで答えてください。
-	"""
-	response = openai.ChatCompletion.create(
-		model="gpt-3.5-turbo",
-		temperature=0,
-		messages=[
-				{"role": "system", "content": system_message},
-				# {"role": "user", "content": "あなたはchatgptですか？"},
-				{"role": "user", "content": f"{image_url}この画像は観光名所の写真ですか？"},
-		],
-  )
-	answer = response.choices[0]["message"]["content"]
-	print(answer)
-	if answer == "はい" or answer == "はい。":
-		daut_flag = 1
-	elif answer == "いいえ" or answer == "いいえ。":
-		daut_flag = 0
-	else:
-		daut_flag = 0
-		print("error")
+	# image_url = "https://spajam-v1-427a5086259a.herokuapp.com/image$filename=" + path
+	image_url = "http://127.0.0.1:8000/".format(path)
+	url = "https://www.clubgets.com/tabimegu/img/blog/tokyo/shinagawa/tower01.jpg"
+
+	# system_message ="""
+	# 質問には必ず「はい」か「いいえ」だけで答えてください。
+	# """
+	# response = openai.ChatCompletion.create(
+	# 	model="gpt-3.5-turbo",
+	# 	temperature=0,
+	# 	messages=[
+	# 			{"role": "system", "content": system_message},
+	# 			# {"role": "user", "content": "あなたはchatgptですか？"},
+	# 			{"role": "user", "content": f"{image_url}この画像は観光名所の写真ですか？"},
+	# 	],
+  # )
+	# answer = response.choices[0]["message"]["content"]
+	# if answer == "はい" or answer == "はい。":
+	# 	daut_flag = 1
+	# elif answer == "いいえ" or answer == "いいえ。":
+	# 	daut_flag = 0
+	# else:
+	# 	daut_flag = 0
+	# 	print("error")
 	system_message = """
 	あなたはチャットボットとして、優しくてかわいいずんだもちの妖精であるずんだもんとして振る舞います。
 	以下の条件に((厳密に))従ってください。
@@ -266,37 +267,27 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 # * 不適切なテキストがあれば注意してください。
 # * ユーザーが閲覧しているサイトの内容を考慮してください。
 
-	if daut_flag:
-		response = openai.ChatCompletion.create(
-			model="gpt-3.5-turbo",
-			temperature=0,
-			messages=[
-					{"role": "system", "content": system_message},
-					{"role": "user", "content": f"{image_url}この写真について説明してください"}
-		],
-	)
-	else:
-		response = openai.ChatCompletion.create(
-			model="gpt-3.5-turbo",
-			temperature=0,
-			messages=[
-					{"role": "system", "content": system_message},
-					{"role": "user", "content": f"{image_url}この写真について観光スポットっぽく解説してください"}
+
+	response = openai.ChatCompletion.create(
+		model="gpt-3.5-turbo",
+		temperature=0,
+		messages=[
+				{"role": "system", "content": system_message},
+				{"role": "user", "content": f"{url}この写真について観光スポットっぽく解説してください"}
 		],
 	)
 	print(response)
 	kaerichi = """{{
-			"answer": {},
+			"answer": 0,
 			"question": "{}"
-	}}""".format(daut_flag, response.choices[0]["message"]["content"])
+	}}""".format(response.choices[0]["message"]["content"])
 
-	# print(response)
-	# text_to_voice(response.choices[0]["message"]["content"])
+	text_to_voice(response.choices[0]["message"]["content"])
 	return kaerichi 
 
-
-@app.get("/image/")
-def image(filename: str):
-	print(filename)
-	with open(filename, "rb") as f:
-		return Response(content=f.read(), media_type="image/png")
+# @app.get("/image")
+# def image(filename: str):
+# 	print(filename)
+# 	print("ここにファイルネーム")
+# 	with open("./api/file/tower.jpeg", "rb") as f:
+# 		return Response(content=f.read(), media_type="image/png")
