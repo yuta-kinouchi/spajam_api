@@ -210,7 +210,7 @@ async def question_generate(file: UploadFile, api: str = Form(...)):
 		shutil.copyfileobj(file.file, buffer)
 
 	image_url = "https://spajam-v1-427a5086259a.herokuapp.com/" + path
-	pictureurl = "https://jiyujin.me/wp-content/uploads/2021/08/tokyotower02.jpg"
+	print(image_url)
 	system_message ="""
 	質問には必ず「はい」か「いいえ」だけで答えてください。
 	"""
